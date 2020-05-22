@@ -1,0 +1,66 @@
+<!-- This is a static file -->
+<!-- served from your routes in server.js -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A cool thing made with Glitch" />
+
+    <title>Welcome to Glitch!</title>
+
+    <link
+      id="favicon"
+      rel="icon"
+      href="https://glitch.com/edit/favicon-app.ico"
+      type="image/x-icon"
+    />
+    <!-- import the webpage's stylesheet -->
+    <link rel="stylesheet" href="/style.css" />
+
+    <script src="https://ajax.aspnetcdn.com/ajax/knockout/knockout-3.5.0.js"></script>
+
+    <script src="https://unpkg.com/page/page.js"></script>
+
+    <!-- import the webpage's client-side javascript file -->
+    <script src="/script.js" defer></script>
+  </head>
+  <body>
+    <!-- Folders -->
+    <ul class="folders" data-bind="foreach: folders">
+      <li
+        data-bind="text: $data, css: {selected: $data === $root.chosenFolderId()}, click: $root.goToFolder"
+      ></li>
+    </ul>
+    <!-- Chosen mail -->
+    <div class="viewMail" data-bind="with: chosenMailData">
+      <div class="mailInfo">
+        <h1 data-bind="text: subject"></h1>
+        <p><label>From</label>: <span data-bind="text: from"></span></p>
+        <p><label>To</label>: <span data-bind="text: to"></span></p>
+        <p><label>Date</label>: <span data-bind="text: date"></span></p>
+      </div>
+      <p class="message" data-bind="html: messageContent" />
+    </div>
+    <!-- Mails grid -->
+    <table class="mails" data-bind="with: chosenFolderData">
+      <thead>
+        <tr>
+          <th>From</th>
+          <th>To</th>
+          <th>Subject</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: mails">
+        <tr data-bind="click: $root.goToMail">
+          <td data-bind="text: from"></td>
+          <td data-bind="text: to"></td>
+          <td data-bind="text: subject"></td>
+          <td data-bind="text: date"></td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>
