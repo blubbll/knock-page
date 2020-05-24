@@ -9,6 +9,8 @@ const { ko, page } = window;
 //set
 let { model } = window;
 
+const initialpath = $("meta[name=path").getAttribute("content");
+
 //apparently page.js doesn't work without this lol
 page.configure({ window: window });
 
@@ -23,6 +25,7 @@ ko.applyBindings(
       self.chosenFolderId = ko.observable();
       self.chosenFolderData = ko.observable();
       self.chosenMailData = ko.observable();
+      self.routed = false;
     }
 
     // Behaviours
@@ -60,19 +63,16 @@ ko.applyBindings(
   })()
 );
 
-//go to default path
-model.goToFolder("Inbox");
-
 //setup Routes
 {
   page("/", model.goToIndex);
-  page("/folder/:folder", () => {});
+  page("/folder/:folder", (ctx, next) => {
+    !model.routed && [
+      (model.routed = true),
+      model.goToFolder(ctx.params.folder)
+    ];
+  });
 }
 
-/*page('/', index)
-page('/user/:user', show)
-page('/user/:user/edit', edit)
-page('/user/:user/album', album)
-page('/user/:user/album/sort', sort)
-page('*', notfound)
-page()*/
+//execute route from server (or default route)
+page(initialpath === "/" ? "/folder/Inbox" : initialpath);
