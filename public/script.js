@@ -71,7 +71,15 @@ ko.applyBindings(
       (model.routed = true),
       model.goToFolder(ctx.params.folder)
     ];
+    console.log(ctx)
   });
+}
+//setup clientside history navigation
+{
+  window.onpopstate = (ev) =>{
+    //console.log(ev.state.path)
+    //page(ev.state.path)
+  }
 }
 
 //execute route from server (or default route)
