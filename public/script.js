@@ -1,45 +1,55 @@
-const api = `${location.protocol}//${location.href.split("//")[1].split("/")[0]}`;
 console.clear();
 
-function WebmailViewModel() {
-    // Data
+//get
+const { ko, page } = window;
+//set
+let { model } = window;
+
+page.configure({ window: window });
+
+ko.applyBindings(
+  new (function() {
+    // proxyfying
     var self = this;
-    self.folders = ['Inbox', 'Archive', 'Sent', 'Spam'];
+    //Data
+    self.folders = ["Inbox", "Archive", "Sent", "Spam"];
     self.chosenFolderId = ko.observable();
     self.chosenFolderData = ko.observable();
     self.chosenMailData = ko.observable();
 
-    // Behaviours    
+    // Behaviours
     self.goToFolder = folder => {
-        self.chosenFolderId(folder);
-        //stop showing mail
-        self.chosenMailData(null);
-        //get data
-        fetch(`/mail?folder=${folder||null}`).then(r => r.json())
-            .then(self.chosenFolderData);
+      //page(`/folder/${folder}`)
+
+      self.chosenFolderId(folder);
+      //stop showing mail
+      self.chosenMailData(null);
+      //get data
+      fetch(`/mail?folder=${folder || null}`)
+        .then(r => r.json())
+        .then(self.chosenFolderData);
     };
 
     self.goToMail = mail => {
+      self.chosenFolderId(mail.folder);
+      //stop showing folder
+      self.chosenFolderData(null);
+      //get data
+      fetch(`/mail?mailId=${mail.id || null}`)
+        .then(r => r.json())
+        .then(self.chosenMailData);
+    };
 
-        self.chosenFolderId(mail.folder);
-        //stop showing folder
-        self.chosenFolderData(null);
-        //get data
-        fetch(`/mail?mailId=${mail.id||null}`).then(r => r.json())
-            .then(self.chosenMailData);
-
-    }
-
-    self.goToFolder('Inbox');
-};
-
-ko.applyBindings(new WebmailViewModel());
-
-
-page('/', index)
+    //expose model func
+    model = this;
+  })()
+);
+//go to default path
+model.goToFolder("Inbox");
+/*page('/', index)
 page('/user/:user', show)
 page('/user/:user/edit', edit)
 page('/user/:user/album', album)
 page('/user/:user/album/sort', sort)
 page('*', notfound)
-page()
+page()*/
