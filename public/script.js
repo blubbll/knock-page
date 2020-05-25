@@ -67,7 +67,7 @@ ko.applyBindings(
       self.goToFolder = (folder, nonav) => {
         nonav !== true && page(`/folder/${folder}`);
 
-        //shush, event stuff lol
+        //no clicky clicky
         if (!nonav.type) {
           self.chosenFolderId(folder);
           //stop showing mail
@@ -82,7 +82,7 @@ ko.applyBindings(
       self.goToMail = (mail, nonav) => {
         nonav !== true && page(`/mail/${mail.id}`);
 
-        //shush, event stuff lol
+        //no clicky clicky
         if (!nonav.type) {
           self.chosenFolderId(mail.folder);
           //stop showing folder
@@ -108,7 +108,11 @@ ko.applyBindings(
     ruru({ ctx, cb: model.goToFolder, param: ctx.params.folder });
   });
   page("/mail/:mail", (ctx, next) => {
-    ruru({ ctx, cb: model.goToMail, param: { id: ctx.params.mail, folder: model.chosenFolderId() } });
+    ruru({
+      ctx,
+      cb: model.goToMail,
+      param: { id: ctx.params.mail, folder: model.chosenFolderId() }
+    });
   });
 }
 
