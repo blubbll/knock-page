@@ -22,8 +22,6 @@ ruru = args => {
     }
 
     if (args.ctx.state.path !== model.state.path) {
-      console.log(1);
-
       args.cb(args.param, true);
     }
     model.state.path = args.ctx.state.path;
@@ -76,10 +74,15 @@ ko.applyBindings(
           .then(self.chosenFolderData);
       };
 
-      self.goToMail = mail => {
+      self.goToMail = (mail, nonav) => {
+        nonav !== true && page(`/mail/${mail.id}`);
+
+        console.log("going to mail", mail);
+
         self.chosenFolderId(mail.folder);
         //stop showing folder
         self.chosenFolderData(null);
+
         //get data
         fetch(`/mail?mailId=${mail.id || null}`)
           .then(r => r.json())
@@ -97,6 +100,9 @@ ko.applyBindings(
   page("/", model.goToIndex);
   page("/folder/:folder", (ctx, next) => {
     ruru({ ctx, cb: model.goToFolder, param: ctx.params.folder });
+  });
+  page("/mail/:mail", (ctx, next) => {
+    ruru({ ctx, cb: model.goToMail, param: { id: ctx.params.mail } });
   });
 }
 
