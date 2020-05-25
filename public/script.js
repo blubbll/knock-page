@@ -12,19 +12,21 @@ let { model, ruru } = window;
 //custom routing extension
 ruru = args => {
   if (!args.first) {
-    console.log("%c Routing to", "background: #222; color: lime", {
-      path: args.ctx.path,
-      param: args.param || null
-    });
+    //only if we aren't here already
+    if (args.ctx.state.path !== model.state.path) {
+      console.log("%c Routing to", "background: #222; color: lime", {
+        path: args.ctx.path,
+        param: args.param || null
+      });
+
+      args.cb(args.param, true);
+    }
+    model.state.path = args.ctx.state.path;
+
     if (!model.routed) {
       args.cb(args.param, true);
       model.routed = true;
     }
-
-    if (args.ctx.state.path !== model.state.path) {
-      args.cb(args.param, true);
-    }
-    model.state.path = args.ctx.state.path;
   } else {
     console.log("%c Routing VIA FIRST to", "background: #222; color: lime", {
       path: model.state.path
@@ -77,16 +79,17 @@ ko.applyBindings(
       self.goToMail = (mail, nonav) => {
         nonav !== true && page(`/mail/${mail.id}`);
 
-        console.log("going to mail", mail);
+        //allow direct access via mail.id only (for direct url access)
+        if (!model.routed || mail || mail.id) {
+          self.chosenFolderId(mail.folder);
+          //stop showing folder
+          self.chosenFolderData(null);
 
-        self.chosenFolderId(mail.folder);
-        //stop showing folder
-        self.chosenFolderData(null);
-
-        //get data
-        fetch(`/mail?mailId=${mail.id || null}`)
-          .then(r => r.json())
-          .then(self.chosenMailData);
+          //get data
+          fetch(`/mail?mailId=${mail.id || mail || null}`)
+            .then(r => r.json())
+            .then(self.chosenMailData);
+        }
       };
     }
 
@@ -102,7 +105,7 @@ ko.applyBindings(
     ruru({ ctx, cb: model.goToFolder, param: ctx.params.folder });
   });
   page("/mail/:mail", (ctx, next) => {
-    ruru({ ctx, cb: model.goToMail, param: { id: ctx.params.mail } });
+    ruru({ ctx, cb: model.goToMail, param: ctx.params.mail });
   });
 }
 
