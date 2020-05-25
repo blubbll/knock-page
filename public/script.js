@@ -7,8 +7,36 @@ const $ = document.querySelector.bind(document),
 //get
 const { ko, page } = window;
 //set
-let { model } = window;
+let { model, ruru } = window;
 
+//custom routing extension
+ruru = args => {
+  if (!args.first) {
+    console.log("%c Routing to", "background: #222; color: lime", {
+      path: args.ctx.path,
+      param: args.param || null
+    });
+    if (!model.routed) {
+      args.cb(args.param, true);
+      model.routed = true;
+    }
+
+    if (args.ctx.state.path !== model.state.path) {
+      console.log(1);
+
+      args.cb(args.param, true);
+    }
+    model.state.path = args.ctx.state.path;
+  } else {
+    console.log("%c Routing VIA FIRST to", "background: #222; color: lime", {
+      path: model.state.path
+    });
+    model.firstrouted = true;
+    page.replace(model.state.path);
+  }
+};
+
+//inherited path from server
 const initialpath = $("meta[name=path").getAttribute("content");
 
 //apparently page.js doesn't work without this lol
@@ -26,6 +54,7 @@ ko.applyBindings(
       self.chosenFolderData = ko.observable();
       self.chosenMailData = ko.observable();
       self.routed = false;
+      self.state = {};
     }
 
     // Behaviours
@@ -35,8 +64,8 @@ ko.applyBindings(
         self.chosenMailData(null);
       };
 
-      self.goToFolder = folder => {
-        page(`/folder/${folder}`);
+      self.goToFolder = (folder, nonav) => {
+        nonav !== true && page(`/folder/${folder}`);
 
         self.chosenFolderId(folder);
         //stop showing mail
@@ -67,20 +96,14 @@ ko.applyBindings(
 {
   page("/", model.goToIndex);
   page("/folder/:folder", (ctx, next) => {
-    !model.routed && [
-      (model.routed = true),
-      model.goToFolder(ctx.params.folder)
-    ];
-    console.log(ctx)
+    ruru({ ctx, cb: model.goToFolder, param: ctx.params.folder });
   });
-}
-//setup clientside history navigation
-{
-  window.onpopstate = (ev) =>{
-    //console.log(ev.state.path)
-    //page(ev.state.path)
-  }
 }
 
 //execute route from server (or default route)
-page(initialpath === "/" ? "/folder/Inbox" : initialpath);
+{
+  const _path = initialpath === "/" ? "/folder/Inbox" : initialpath;
+  model.state = { path: _path };
+
+  ruru({ cb: model.goToFolder, param: _path, first: true });
+}
