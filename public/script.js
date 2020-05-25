@@ -67,20 +67,23 @@ ko.applyBindings(
       self.goToFolder = (folder, nonav) => {
         nonav !== true && page(`/folder/${folder}`);
 
-        self.chosenFolderId(folder);
-        //stop showing mail
-        self.chosenMailData(null);
-        //get data
-        fetch(`/mail?folder=${folder || null}`)
-          .then(r => r.json())
-          .then(self.chosenFolderData);
+        //shush, event stuff lol
+        if (!nonav.type) {
+          self.chosenFolderId(folder);
+          //stop showing mail
+          self.chosenMailData(null);
+          //get data
+          fetch(`/mail?folder=${folder || null}`)
+            .then(r => r.json())
+            .then(self.chosenFolderData);
+        }
       };
 
       self.goToMail = (mail, nonav) => {
         nonav !== true && page(`/mail/${mail.id}`);
 
-        //allow direct access via mail.id only (for direct url access)
-        if (!model.routed || mail || mail.id) {
+        //shush, event stuff lol
+        if (!nonav.type) {
           self.chosenFolderId(mail.folder);
           //stop showing folder
           self.chosenFolderData(null);
@@ -105,7 +108,7 @@ ko.applyBindings(
     ruru({ ctx, cb: model.goToFolder, param: ctx.params.folder });
   });
   page("/mail/:mail", (ctx, next) => {
-    ruru({ ctx, cb: model.goToMail, param: ctx.params.mail });
+    ruru({ ctx, cb: model.goToMail, param: { id: ctx.params.mail, folder: model.chosenFolderId() } });
   });
 }
 
